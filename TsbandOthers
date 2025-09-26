@@ -1,0 +1,205 @@
+-- Enhanced Unique and Realistic Key System Script (Instant disappear on correct key)
+-- Created by Grok - Version 2.2
+
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+
+local player = Players.LocalPlayer
+if not player then
+    warn("[EnhancedKeySystem] This script must run as a LocalScript in StarterGui and be tested in Play (Solo).")
+    return
+end
+
+-- GUI root
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "EnhancedKeySystem"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.DisplayOrder = 9999
+
+-- Background Blur Effect
+local blurEffect = Lighting:FindFirstChild("EnhancedKeySystemBlur")
+if not blurEffect then
+    blurEffect = Instance.new("BlurEffect")
+    blurEffect.Name = "EnhancedKeySystemBlur"
+    blurEffect.Size = 0
+    blurEffect.Parent = Lighting
+end
+
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 350, 0, 250)
+mainFrame.Position = UDim2.new(0.5, -175, 0.5, -125)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+pcall(function() mainFrame.Draggable = true end)
+mainFrame.Parent = screenGui
+
+local uiGradient = Instance.new("UIGradient", mainFrame)
+uiGradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 40, 40)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 10))
+}
+
+local uiCorner = Instance.new("UICorner", mainFrame)
+uiCorner.CornerRadius = UDim.new(0, 12)
+
+-- Shadow Frame
+local shadowFrame = Instance.new("Frame", mainFrame)
+shadowFrame.Size = UDim2.new(1, 10, 1, 10)
+shadowFrame.Position = UDim2.new(0, -5, 0, -5)
+shadowFrame.BackgroundTransparency = 0.6
+shadowFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+shadowFrame.ZIndex = mainFrame.ZIndex - 1
+shadowFrame.BorderSizePixel = 0
+local shadowCorner = Instance.new("UICorner", shadowFrame)
+shadowCorner.CornerRadius = UDim.new(0, 12)
+
+-- Title Label
+local titleLabel = Instance.new("TextLabel", mainFrame)
+titleLabel.Size = UDim2.new(1, 0, 0, 50)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Secure Key Access"
+titleLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+titleLabel.Font = Enum.Font.GothamSemibold
+titleLabel.TextSize = 22
+
+-- Close Button
+local closeButton = Instance.new("TextButton", mainFrame)
+closeButton.Size = UDim2.new(0, 40, 0, 40)
+closeButton.Position = UDim2.new(1, -45, 0, 5)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+closeButton.Text = "✕"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextSize = 18
+local closeCorner = Instance.new("UICorner", closeButton)
+closeCorner.CornerRadius = UDim.new(0, 20)
+
+closeButton.MouseEnter:Connect(function()
+    pcall(function() TweenService:Create(closeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 40, 40)}):Play() end)
+end)
+closeButton.MouseLeave:Connect(function()
+    pcall(function() TweenService:Create(closeButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 60, 60)}):Play() end)
+end)
+
+closeButton.MouseButton1Click:Connect(function()
+    if screenGui and screenGui.Parent then screenGui:Destroy() end
+    if blurEffect and blurEffect.Parent then blurEffect:Destroy() end
+end)
+
+-- Key Input
+local keyInput = Instance.new("TextBox", mainFrame)
+keyInput.Size = UDim2.new(0.9, 0, 0, 45)
+keyInput.Position = UDim2.new(0.05, 0, 0.3, 0)
+keyInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+keyInput.TextColor3 = Color3.fromRGB(220, 220, 220)
+keyInput.PlaceholderText = "Enter Access Key"
+keyInput.Font = Enum.Font.Gotham
+keyInput.TextSize = 16
+local keyCorner = Instance.new("UICorner", keyInput)
+keyCorner.CornerRadius = UDim.new(0, 6)
+
+-- Submit Button
+local submitButton = Instance.new("TextButton", mainFrame)
+submitButton.Size = UDim2.new(0.9, 0, 0, 45)
+submitButton.Position = UDim2.new(0.05, 0, 0.6, 0)
+submitButton.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+submitButton.Text = "Verify Key"
+submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+submitButton.Font = Enum.Font.GothamBold
+submitButton.TextSize = 18
+local submitCorner = Instance.new("UICorner", submitButton)
+submitCorner.CornerRadius = UDim.new(0, 6)
+
+submitButton.MouseEnter:Connect(function()
+    pcall(function() TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 120, 220)}):Play() end)
+end)
+submitButton.MouseLeave:Connect(function()
+    pcall(function() TweenService:Create(submitButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 150, 255)}):Play() end)
+end)
+
+-- Copy Link Button
+local linkButton = Instance.new("TextButton", mainFrame)
+linkButton.Size = UDim2.new(0.9, 0, 0, 34)
+linkButton.Position = UDim2.new(0.05, 0, 0.755, 0)
+linkButton.BackgroundColor3 = Color3.fromRGB(100, 120, 255)
+linkButton.Text = "Copy Link"
+linkButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+linkButton.Font = Enum.Font.GothamSemibold
+linkButton.TextSize = 16
+local linkCorner = Instance.new("UICorner", linkButton)
+linkCorner.CornerRadius = UDim.new(0, 6)
+
+-- Valid Keys
+local validKeys = {
+    "Fxk",
+    "Kxf",
+    "Forcass x kieuro",
+    "Kieuro x forcas"
+}
+
+local function validateKey(key)
+    if not key then return false end
+    local trimmed = key:match("^%s*(.-)%s*$") or key
+    local lower = trimmed:lower()
+    for _, v in ipairs(validKeys) do
+        if lower == v:lower() then return true end
+    end
+    return false
+end
+
+-- Submit Button Logic (Instant disappear)
+submitButton.MouseButton1Click:Connect(function()
+    local enteredKey = keyInput.Text or ""
+    if validateKey(enteredKey) then
+        -- Notify
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Access Granted",
+                Text = "Key verified successfully!",
+                Duration = 2
+            })
+        end)
+
+        -- Run script
+        pcall(function()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/KieurOo/External-Fxk/refs/heads/main/CrisdanBayot'))()
+        end)
+
+        -- Destroy GUI and blur instantly
+        if screenGui and screenGui.Parent then screenGui:Destroy() end
+        if blurEffect and blurEffect.Parent then blurEffect:Destroy() end
+    else
+        player:Kick("Wrong Key Check ur key first before verifying")
+    end
+end)
+
+-- Copy Link Logic
+linkButton.MouseButton1Click:Connect(function()
+    local link = "https://www.roblox.com/users/9397215382/profile"
+    pcall(function()
+        if setclipboard then setclipboard(link) end
+        StarterGui:SetCore("SendNotification", {
+            Title = "Key System",
+            Text = "Link copied to clipboard",
+            Duration = 3
+        })
+    end)
+end)
+
+-- Press Enter to verify
+keyInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        submitButton.MouseButton1Click:Wait()
+    end
+end)
+
+-- Initial fade-in (optional)
+mainFrame.BackgroundTransparency = 0
+blurEffect.Size = 12
